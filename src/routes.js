@@ -4,7 +4,7 @@ const { addUserHandler, loginUserHandler } = require('./handler');
 const router = Router();
 
 router.get('/login', (req, res) => {
-    res.send('<h1>LOGIN PAGE</h1>');
+    res.render('login');
 });
 
 router.post('/login', loginUserHandler);

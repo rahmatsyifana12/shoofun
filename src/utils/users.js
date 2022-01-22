@@ -14,6 +14,7 @@ if (!fs.existsSync(dataPath)) {
 const loadUsers = () => {
     const fileBuffer = fs.readFileSync('data/users.json', 'utf-8');
     const users = JSON.parse(fileBuffer);
+
     return users;
 };
 
@@ -29,7 +30,14 @@ const addUser = (user) => {
 
 const userAlreadyExist = (username, email) => {
     const users = loadUsers();
+
     return users.find((user) => user.username === username || user.email === email);
 }
 
-module.exports = { loadUsers, saveUsers, addUser, userAlreadyExist };
+const findUser = (usernameOrEmail) => {
+    const users = loadUsers();
+
+    return users.find((user) => user.username === username || user.email === email);
+}
+
+module.exports = { loadUsers, saveUsers, addUser, userAlreadyExist, findUser };
