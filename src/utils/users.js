@@ -40,4 +40,4 @@ const findUser = (usernameOrEmail) => {
     return users.find((user) => user.username === usernameOrEmail || user.email === usernameOrEmail);
 }
 
-module.exports = { loadUsers, saveUsers, addUser, userAlreadyExist, findUser };
+module.exports = { addUser, userAlreadyExist, findUser };

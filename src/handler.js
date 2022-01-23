@@ -1,7 +1,7 @@
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
-const { redirect } = require('express/lib/response');
-const { addUser, userAlreadyExist, findUser, confirmedPassword } = require('./utils/users');
+const jwt = require('jsonwebtoken');
+const { addUser, userAlreadyExist, findUser } = require('./utils/users');
 const User = require('./models/user');
 
 const addUserHandler = (req, res) => {
@@ -35,23 +35,27 @@ const addUserHandler = (req, res) => {
 const loginUserHandler = (req, res) => {
     const { usernameOrEmail, password } = req.body;
     const msg = { status: 'success', message: 'Successfully login' };
-    const user = findUser(usernameOrEmail);
+    const foundUser = findUser(usernameOrEmail);
 
-    if (!user) {
+    if (!foundUser) {
         msg.status = 'fail';
         msg.message = 'Account doesn\'t exist';
         return res.status(400).json(msg);
     }
 
-    if (!bcrypt.compareSync(password, user.password)) {
-        msg.status = 'fail';
-        msg.message = 'Object or value is invalid';
-        return res.status(400).json(msg);
-    }
-
     try {
+        if (!bcrypt.compareSync(password, foundUser.password)) {
+            msg.status = 'fail';
+            msg.message = 'Object or value is invalid';
+            return res.status(400).json(msg);
+        }
+
+        const token = jwt.sign({ username: foundUser.username }, process.env.ACCESS_TOKEN_SECRET);
+        Object.assign(msg, { token });
+
         return res.status(200).json(msg);
     } catch (err) {
+        console.log(err);
         msg.status = 'fail';
         msg.message = 'Unexpected server error';
         return res.status(500).json(msg);
