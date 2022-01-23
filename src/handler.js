@@ -1,7 +1,13 @@
+const { nanoid } = require('nanoid');
+const bcrypt = require('bcrypt');
+const { redirect } = require('express/lib/response');
 const { addUser, userAlreadyExist, findUser, confirmedPassword } = require('./utils/users');
 
 const addUserHandler = (req, res) => {
     const { username, displayName, email, phoneNumber, password } = req.body;
+    const id = nanoid(8);
+
+    const newUser = { id, username, displayName, email, phoneNumber, password };
     const msg = { status: 'success', message: 'Successfully registered a new account' };
 
     if (userAlreadyExist(username, email)) {
@@ -11,14 +17,16 @@ const addUserHandler = (req, res) => {
     }
 
     try {
-        addUser(req.body);
+        const saltRounds = 10;
+        newUser.password = bcrypt.hashSync(password, saltRounds);
+        addUser(newUser);
+        console.log(newUser);
         return res.status(200).json(msg);
     } catch (err) {
         msg.status = 'fail';
         msg.message = 'Unexpected server error';
         return res.status(500).json(msg);
     }
-    
 };
 
 const loginUserHandler = (req, res) => {
@@ -32,7 +40,7 @@ const loginUserHandler = (req, res) => {
         return res.status(400).json(msg);
     }
 
-    if (!user.password === password) {
+    if (!bcrypt.compareSync(password, user.password)) {
         msg.status = 'fail';
         msg.message = 'Object or value is invalid';
         return res.status(400).json(msg);

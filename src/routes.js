@@ -15,5 +15,9 @@ router.get('/register', (req, res) => {
 
 router.post('/register', addUserHandler);
 
+router.get('/', (req, res) => {
+    res.render('index');
+});
+
 
 module.exports = router;
