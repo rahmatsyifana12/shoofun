@@ -2,12 +2,14 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const { redirect } = require('express/lib/response');
 const { addUser, userAlreadyExist, findUser, confirmedPassword } = require('./utils/users');
+const User = require('./models/user');
 
 const addUserHandler = (req, res) => {
     const { username, displayName, email, phoneNumber, password } = req.body;
     const id = nanoid(8);
 
-    const newUser = { id, username, displayName, email, phoneNumber, password };
+    const newUser = new User(id, username, displayName, email, phoneNumber, password);
+
     const msg = { status: 'success', message: 'Successfully registered a new account' };
 
     if (userAlreadyExist(username, email)) {
