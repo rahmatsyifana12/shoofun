@@ -37,7 +37,7 @@ const userAlreadyExist = (username, email) => {
 const findUser = (usernameOrEmail) => {
     const users = loadUsers();
 
-    return users.find((user) => user.username === username || user.email === email);
+    return users.find((user) => user.username === usernameOrEmail || user.email === usernameOrEmail);
 }
 
 module.exports = { loadUsers, saveUsers, addUser, userAlreadyExist, findUser };

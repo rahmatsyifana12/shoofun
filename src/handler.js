@@ -18,9 +18,10 @@ const addUserHandler = (req, res) => {
         return res.status(400).json(msg);
     }
 
+    const saltRounds = 10;
+    newUser.password = bcrypt.hashSync(password, saltRounds);
+
     try {
-        const saltRounds = 10;
-        newUser.password = bcrypt.hashSync(password, saltRounds);
         addUser(newUser);
         console.log(newUser);
         return res.status(200).json(msg);
