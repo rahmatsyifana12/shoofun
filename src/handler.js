@@ -1,8 +1,9 @@
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { addUser, userAlreadyExist, findUser } = require('./utils/users');
 const User = require('./models/user');
+const { addUser, userAlreadyExist, findUser } = require('./utils/users');
+const { loadProducts } = require('./utils/products');
 
 const addUserHandler = (req, res) => {
     const { username, displayName, email, phoneNumber, password } = req.body;
@@ -66,6 +67,38 @@ const loginUserHandler = (req, res) => {
 
         return res.status(500).json(msg);
     }
-};  
+};
 
-module.exports = { addUserHandler, loginUserHandler };
+const viewRegisterPage = (req, res) => {
+    res.render('register');
+}
+
+const viewLoginPage = (req, res) => {
+    res.render('login');
+}
+
+const viewProducts = (req, res) => {
+    // res.render('index');
+    const products = loadProducts();
+    const msg = { status: 'success', message: 'Found all products' };
+
+    if (products.length === 0) {
+        msg.status = 'fail';
+        msg.message = 'Product not found';
+
+        return res.status(404).json(msg);
+    }
+
+    try {
+        Object.assign(msg, { products });
+
+        return res.status(200).json(msg);
+    } catch (err) {
+        msg.status = 'fail';
+        msg.message = 'Unexpected server error';
+
+        return res.status(500).json(msg);
+    }
+}
+
+module.exports = { addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts };
