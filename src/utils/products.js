@@ -12,4 +12,10 @@ const loadProducts = () => {
     return products;
 }
 
-module.exports = { loadProducts };
+const findProductById = (id) => {
+    const products = loadProducts();
+
+    return products.find((product) => product.id === id);
+}
+
+module.exports = { loadProducts, findProductById };

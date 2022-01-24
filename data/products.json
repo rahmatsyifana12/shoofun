@@ -1,1 +1,9 @@
-[]
+[
+    {
+        "id": 124,
+        "name": "Asus ROG",
+        "price": 15000000,
+        "description": "Built for gamers",
+        "quantityPurchased": 84
+    }
+]

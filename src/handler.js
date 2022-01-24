@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('./models/user');
 const { addUser, userAlreadyExist, findUser } = require('./utils/users');
-const { loadProducts } = require('./utils/products');
+const { loadProducts, findProductById } = require('./utils/products');
 
 const addUserHandler = (req, res) => {
     const { username, displayName, email, phoneNumber, password } = req.body;
@@ -101,4 +101,28 @@ const viewProducts = (req, res) => {
     }
 }
 
-module.exports = { addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts };
+const viewProductById = (req, res) => {
+    const productId = req.params.productId;
+    const foundProduct = findProductById(parseInt(productId));
+    const msg = { status: 'success', message: 'Product found' };
+
+    if (!foundProduct) {
+        msg.status = 'fail';
+        msg.message = 'Product not found';
+
+        return res.status(404).json(msg);
+    }
+
+    try {   
+        Object.assign(msg, { foundProduct });
+
+        return res.status(200).json(msg);
+    } catch (err) {
+        msg.status = 'fail';
+        msg.message = 'Unexpected server error';
+
+        return res.status(500).json(msg);
+    }
+}
+
+module.exports = { addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById };
