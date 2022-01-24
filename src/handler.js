@@ -15,6 +15,7 @@ const addUserHandler = (req, res) => {
     if (userAlreadyExist(username, email)) {
         msg.status = 'fail';
         msg.message = 'This account is already exist';
+        
         return res.status(400).json(msg);
     }
 
@@ -24,10 +25,12 @@ const addUserHandler = (req, res) => {
     try {
         addUser(newUser);
         console.log(newUser);
+
         return res.status(200).json(msg);
     } catch (err) {
         msg.status = 'fail';
         msg.message = 'Unexpected server error';
+
         return res.status(500).json(msg);
     }
 };
@@ -40,6 +43,7 @@ const loginUserHandler = (req, res) => {
     if (!foundUser) {
         msg.status = 'fail';
         msg.message = 'Account doesn\'t exist';
+
         return res.status(400).json(msg);
     }
 
@@ -47,6 +51,7 @@ const loginUserHandler = (req, res) => {
         if (!bcrypt.compareSync(password, foundUser.password)) {
             msg.status = 'fail';
             msg.message = 'Object or value is invalid';
+
             return res.status(400).json(msg);
         }
 
@@ -58,6 +63,7 @@ const loginUserHandler = (req, res) => {
         console.log(err);
         msg.status = 'fail';
         msg.message = 'Unexpected server error';
+
         return res.status(500).json(msg);
     }
 };  
