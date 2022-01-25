@@ -5,5 +5,12 @@
         "price": 15000000,
         "description": "Built for gamers",
         "quantityPurchased": 84
+    },
+    {
+        "id": 123,
+        "name": "Macbook",
+        "price": 18000000,
+        "description": "Expensive laptop",
+        "quantityPurchased": 102
     }
 ]

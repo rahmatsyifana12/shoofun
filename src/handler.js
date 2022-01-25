@@ -2,15 +2,14 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('./models/user');
+const Product = require('./models/product');
 const { addUser, userAlreadyExist, findUser } = require('./utils/users');
-const { loadProducts, findProductById } = require('./utils/products');
+const { loadProducts, findProductById, addProduct } = require('./utils/products');
 
 const addUserHandler = (req, res) => {
     const { username, displayName, email, phoneNumber, password } = req.body;
     const id = nanoid(8);
-
     const newUser = new User(id, username, displayName, email, phoneNumber, password);
-
     const msg = { status: 'success', message: 'Successfully registered a new account' };
 
     if (userAlreadyExist(username, email)) {
@@ -77,8 +76,11 @@ const viewLoginPage = (req, res) => {
     res.render('login');
 }
 
+const viewAddProductPage = (req, res) => {
+    res.render('addProduct');
+}
+
 const viewProducts = (req, res) => {
-    // res.render('index');
     const products = loadProducts();
     const msg = { status: 'success', message: 'Found all products' };
 
@@ -125,4 +127,25 @@ const viewProductById = (req, res) => {
     }
 }
 
-module.exports = { addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById };
+const addProductHandler = (req, res) => {
+    const { name, price, description } = req.body;
+    const id = nanoid(8);
+    const newProduct = new Product(id, name, price, description, 0);
+    const msg = { status: 'success', message: 'Added new product successfully' };
+
+    try {
+        addProduct(newProduct);
+        console.log(newProduct);
+
+        return res.status(200).json(msg);
+    } catch (err) {
+        msg.status = 'fail';
+        msg.message = 'Unexpected server error';
+
+        return res.status(500).json(msg);
+    }
+}
+
+module.exports = { 
+    addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById, addProductHandler, viewAddProductPage 
+};
