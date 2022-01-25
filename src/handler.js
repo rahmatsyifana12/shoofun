@@ -5,10 +5,11 @@ const User = require('./models/user');
 const Product = require('./models/product');
 const { addUser, userAlreadyExist, findUser } = require('./utils/users');
 const { loadProducts, findProductById, addProduct } = require('./utils/products');
+const { getUserId, getProductId } = require('./utils/ids');
 
 const addUserHandler = (req, res) => {
     const { username, displayName, email, phoneNumber, password } = req.body;
-    const id = nanoid(8);
+    const id = getUserId();
     const newUser = new User(id, username, displayName, email, phoneNumber, password);
     const msg = { status: 'success', message: 'Successfully registered a new account' };
 
@@ -129,7 +130,7 @@ const viewProductById = (req, res) => {
 
 const addProductHandler = (req, res) => {
     const { name, price, description } = req.body;
-    const id = nanoid(8);
+    const id = getProductId();
     const newProduct = new Product(id, name, price, description, 0);
     const msg = { status: 'success', message: 'Added new product successfully' };
 

@@ -1,10 +1,18 @@
 [
     {
-        "id": "cxya_Wrk",
+        "id": 1,
         "username": "rikudou192",
         "displayName": "Rikudou Sennin",
         "email": "rikudou@gmail.com",
+        "phoneNumber": "08123456789",
+        "password": "$2b$10$dbCSeXdcMaT5GsyfH18GlOd0S3CXDShQ6eNbBMJsk2yliU8j5lxx."
+    },
+    {
+        "id": 2,
+        "username": "rahmats12",
+        "displayName": "Rahmat S",
+        "email": "rahmat@gmail.com",
         "phoneNumber": "08122981029",
-        "password": "$2b$10$kN4Igmz7XPbmoeVfYzhSSe5TyWO6sLKEGsfMdmjXVkHmPT6oXSlqq"
+        "password": "$2b$10$d8jsoJDfOKqyVpDRNGhpD.enTw0jRBbTTvtnaXeoHNVAFaZEHvWPG"
     }
 ]
