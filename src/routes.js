@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById, addNewProductHandler, viewAddProductPage, addProductToCartHandler } = require('./handler');
+const { addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById, addNewProductHandler, viewAddProductPage, addProductToCartHandler } = require('./handlers');
 
 const router = Router();
 
