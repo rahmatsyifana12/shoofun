@@ -167,7 +167,7 @@ const addProductToCartHandler = (req, res) => {
     const productId = req.params.productId;
     const foundProduct = findProductById(parseInt(productId));
 
-    const authHeader = req.header('authorization');
+    const authHeader = req.headers['authorization'];
     const token = authHeader.split(' ')[1];
     const payload = parseJwt(token);
     const userId = payload.userId;
