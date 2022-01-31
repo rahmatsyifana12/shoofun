@@ -8,9 +8,9 @@ const { getUserId, getProductId } = require('./utils/ids');
 const { addProductToCart } = require('./utils/carts');
 
 function parseJwt (token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 
@@ -19,26 +19,27 @@ function parseJwt (token) {
 
 const viewRegisterPage = (req, res) => {
     res.render('register');
-}
+};
 
 const viewLoginPage = (req, res) => {
     res.render('login');
-}
+};
 
 const viewAddProductPage = (req, res) => {
     res.render('addProduct');
-}
+};
 
 const addUserHandler = (req, res) => {
     const { username, displayName, email, phoneNumber, password } = req.body;
     const id = getUserId();
-    const newUser = new User(id, username, displayName, email, phoneNumber, password);
+    const newUser = new User(
+        id, username, displayName, email, phoneNumber, password
+    );
     const msg = { status: 'success', message: 'Successfully registered a new account' };
 
     if (userAlreadyExist(username, email)) {
         msg.status = 'fail';
         msg.message = 'This account is already exist';
-        
         return res.status(400).json(msg);
     }
 
@@ -81,9 +82,15 @@ const loginUserHandler = (req, res) => {
 
             return res.status(400).json(msg);
         }
-        
-        const token = jwt.sign({ userId: foundUser.id, username: foundUser.username }, process.env.ACCESS_TOKEN_SECRET);
-        Object.assign(msg, { token });
+        const token = jwt.sign(
+            {
+                userId: foundUser.id,
+                username: foundUser.username
+            },
+            process.env.ACCESS_TOKEN_SECRET
+        );
+        Object.assign(msg, { token }
+        );
 
         return res.status(200).json(msg);
     } catch (err) {
@@ -116,7 +123,7 @@ const viewProducts = (req, res) => {
 
         return res.status(500).json(msg);
     }
-}
+};
 
 const viewProductById = (req, res) => {
     const productId = req.params.productId;
@@ -130,7 +137,7 @@ const viewProductById = (req, res) => {
         return res.status(404).json(msg);
     }
 
-    try {   
+    try {
         Object.assign(msg, { foundProduct });
 
         return res.status(200).json(msg);
@@ -140,7 +147,7 @@ const viewProductById = (req, res) => {
 
         return res.status(500).json(msg);
     }
-}
+};
 
 const addNewProductHandler = (req, res) => {
     const { name, price, description } = req.body;
@@ -161,7 +168,7 @@ const addNewProductHandler = (req, res) => {
 
         return res.status(500).json(msg);
     }
-}
+};
 
 const addProductToCartHandler = (req, res) => {
     const productId = req.params.productId;
@@ -184,8 +191,16 @@ const addProductToCartHandler = (req, res) => {
             message: 'Unexpected server error'
         });
     }
-}
+};
 
 module.exports = {
-    addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById, addNewProductHandler, viewAddProductPage, addProductToCartHandler
+    addUserHandler,
+    loginUserHandler,
+    viewRegisterPage,
+    viewLoginPage,
+    viewProducts,
+    viewProductById,
+    addNewProductHandler,
+    viewAddProductPage,
+    addProductToCartHandler
 };

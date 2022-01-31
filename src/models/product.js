@@ -6,6 +6,6 @@ const Product = class Product {
         this.description = description;
         this.quantityPurchased = quantityPurchased;
     }
-}
+};
 
 module.exports = Product;

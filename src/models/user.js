@@ -7,6 +7,6 @@ const User = class User {
         this.phoneNumber = phoneNumber;
         this.password = password;
     }
-}
+};
 
 module.exports = User;
