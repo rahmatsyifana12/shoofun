@@ -15,7 +15,7 @@ function parseJwt (token) {
     }).join(''));
 
     return JSON.parse(jsonPayload);
-};
+}
 
 const viewRegisterPage = (req, res) => {
     res.render('register');
@@ -186,6 +186,6 @@ const addProductToCartHandler = (req, res) => {
     }
 }
 
-module.exports = { 
+module.exports = {
     addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById, addNewProductHandler, viewAddProductPage, addProductToCartHandler
 };

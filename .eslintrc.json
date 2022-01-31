@@ -1,0 +1,59 @@
+{
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "arrow-parens": "error",
+        "brace-style": "error",
+        "block-spacing": "error",
+        "curly": "error",
+        "eqeqeq": "error",
+
+        "no-var": "error",
+        "no-empty": "warn",
+        "no-unused-vars": "warn",
+        "no-array-constructor": "error",
+        "no-constructor-return": "error",
+        "no-unreachable-loop": "error",
+        "no-self-compare": "warn",
+        "no-template-curly-in-string": "warn",
+        "no-new-object": "error",
+        "no-new-wrappers": "error",
+        "no-labels": "error",
+        "no-label-var": "error",
+
+        // securities
+        "no-eval": "error",
+        "no-implied-eval": "error",
+        "no-new-func": "error",
+
+        "prefer-const": "warn",
+        "prefer-exponentiation-operator": "error",
+
+        "keyword-spacing": "error",
+        "semi": "error",
+        "yoda": "warn",
+
+        "indent": ["error"],
+        "comma-style": ["error", "last"],
+        "jsx-quotes": ["error", "prefer-single"],
+        "quotes": ["error", "single"],
+        "linebreak-style": ["error", "unix"],
+        "max-len": [
+            "error",
+            {
+                "ignoreUrls": true,
+                "ignoreStrings": true,
+                "ignoreTemplateLiterals": true
+            }
+        ]
+    }
+}

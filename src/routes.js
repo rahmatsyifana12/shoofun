@@ -12,6 +12,6 @@ router.get('/products/add', viewAddProductPage);
 router.post('/login', loginUserHandler);
 router.post('/register', addUserHandler);
 router.post('/products/add', addNewProductHandler);
-router.post('/products/:productId', addProductToCartHandler); 
+router.post('/products/:productId', addProductToCartHandler);
 
 module.exports = router;
