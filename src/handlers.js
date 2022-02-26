@@ -179,6 +179,13 @@ const addProductToCartHandler = (req, res) => {
     const payload = parseJwt(token);
     const userId = payload.userId;
 
+    if (!foundProduct) {
+        return res.status(404).json({
+            status: 'fail',
+            message: 'Product not found'
+        });
+    }
+
     try {
         addProductToCart(userId, foundProduct);
         return res.status(200).json({
