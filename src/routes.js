@@ -1,5 +1,16 @@
 const { Router } = require('express');
-const { addUserHandler, loginUserHandler, viewRegisterPage, viewLoginPage, viewProducts, viewProductById, addNewProductHandler, viewAddProductPage, addProductToCartHandler } = require('./handlers');
+const {
+    addUserHandler,
+    loginUserHandler,
+    viewRegisterPage,
+    viewLoginPage,
+    viewProducts,
+    viewProductById,
+    addNewProductHandler,
+    viewAddProductPage,
+    addProductToCartHandler,
+    viewCart
+} = require('./handlers');
 
 const router = Router();
 
@@ -8,6 +19,7 @@ router.get('/register', viewRegisterPage);
 router.get('/', viewProducts);
 router.get('/products/:productId', viewProductById);
 router.get('/products/add', viewAddProductPage);
+router.get('/cart', viewCart);
 
 router.post('/login', loginUserHandler);
 router.post('/register', addUserHandler);

@@ -35,4 +35,8 @@ const addProductToCart = (userId, product) => {
     }
 };
 
-module.exports = { findCartByUserId, addProductToCart };
+const getUserCart = (userId) => {
+
+};
+
+module.exports = { findCartByUserId, addProductToCart, getUserCart };

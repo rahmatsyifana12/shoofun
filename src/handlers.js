@@ -5,7 +5,7 @@ const Product = require('./models/product');
 const { addUser, userAlreadyExist, findUser } = require('./utils/users');
 const { loadProducts, findProductById, addProduct } = require('./utils/products');
 const { getUserId, getProductId } = require('./utils/ids');
-const { addProductToCart } = require('./utils/carts');
+const { addProductToCart, getUserCart } = require('./utils/carts');
 
 function parseJwt (token) {
     const base64Url = token.split('.')[1];
@@ -200,6 +200,15 @@ const addProductToCartHandler = (req, res) => {
     }
 };
 
+const viewCart = (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader.split(' ')[1];
+    const payload = parseJwt(token);
+    const userId = payload.userId;
+
+    const userCart = getUserCart(userId);
+};
+
 module.exports = {
     addUserHandler,
     loginUserHandler,
@@ -209,5 +218,6 @@ module.exports = {
     viewProductById,
     addNewProductHandler,
     viewAddProductPage,
-    addProductToCartHandler
+    addProductToCartHandler,
+    viewCart
 };
