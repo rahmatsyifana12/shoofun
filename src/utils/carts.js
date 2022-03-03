@@ -30,6 +30,7 @@ const addProductToCart = (userId, product) => {
     if (!foundCart) {
         createUserCart(userId, product);
     } else {
+        foundCart.products.push(product);
         saveCarts(carts);
     }
 };
