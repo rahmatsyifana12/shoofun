@@ -202,11 +202,35 @@ const addProductToCartHandler = (req, res) => {
 
 const viewCart = (req, res) => {
     const authHeader = req.headers['authorization'];
+
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'fail',
+            message: 'Unauthorized error'
+        });
+    }
+
     const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err) => {
+        if (err) {
+            return res.status(401).json({
+                status: 'fail',
+                message: 'Unauthorized error'
+            });
+        }
+    });
+
     const payload = parseJwt(token);
     const userId = payload.userId;
 
     const userCart = getUserCart(userId);
+
+    return res.status(200).json({
+        status: 'success',
+        message: 'Cart found',
+        products: userCart
+    });
 };
 
 module.exports = {

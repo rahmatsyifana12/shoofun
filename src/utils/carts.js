@@ -36,7 +36,14 @@ const addProductToCart = (userId, product) => {
 };
 
 const getUserCart = (userId) => {
+    const carts = loadCarts();
+    const foundCart = carts.find((cart) => cart.userId === userId);
 
+    if (!foundCart) {
+        return null;
+    }
+
+    return foundCart.products;
 };
 
 module.exports = { findCartByUserId, addProductToCart, getUserCart };
