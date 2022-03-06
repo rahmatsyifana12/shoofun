@@ -5,5 +5,17 @@
         "price": "18000000",
         "description": "Very cool smart phone",
         "quantityPurchased": 0
+    },
+    {
+        "name": "Asus ROG",
+        "price": 15000000,
+        "description": "Built for gamers",
+        "quantityPurchased": 0
+    },
+    {
+        "name": "Minyak pelumas rantai sepeda - FINISH LINE",
+        "price": 200000,
+        "description": "Menjaga rantai sepeda anda tetap terawat",
+        "quantityPurchased": 0
     }
 ]

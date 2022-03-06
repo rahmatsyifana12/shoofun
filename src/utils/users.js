@@ -34,12 +34,13 @@ const userAlreadyExist = (username, email) => {
     });
 };
 
-const findUser = (usernameOrEmail) => {
+const findUser = (usernameOrEmailOrUserId) => {
     const users = loadUsers();
 
     return users.find((user) => {
-        return user.username === usernameOrEmail ||
-        user.email === usernameOrEmail;
+        return user.username === usernameOrEmailOrUserId ||
+            user.email === usernameOrEmailOrUserId ||
+            user.id === usernameOrEmailOrUserId;
     });
 };
 

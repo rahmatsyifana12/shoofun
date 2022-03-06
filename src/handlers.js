@@ -19,11 +19,38 @@ const viewAddProductPage = (req, res) => {
     res.render('addProduct');
 };
 
+const viewCheckout = (req, res) => {
+    const token = req.headers['authorization'].split(' ')[1];
+    const userId = jwt.decode(token).userId;
+    const userCart = getUserCart(userId);
+    const foundUser = findUser(userId);
+
+    if (!userCart || userCart.length) {
+        // redirect to cart
+    }
+
+    try {
+        return res.status(200).json({
+            status: 'success',
+            products: userCart,
+            displayName: foundUser.displayName,
+            address: foundUser.address
+        });
+    } catch (err) {
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Unexpected server error'
+        });
+    }
+};
+
 const addUserHandler = (req, res) => {
-    const { username, displayName, email, phoneNumber, password } = req.body;
+    const {
+        username, displayName, email, phoneNumber, address, password
+    } = req.body;
     const id = getUserId();
     const newUser = new User(
-        id, username, displayName, email, phoneNumber, password
+        id, username, displayName, email, phoneNumber, address, password
     );
     const msg = { status: 'success', message: 'Successfully registered a new account' };
 
@@ -32,8 +59,6 @@ const addUserHandler = (req, res) => {
         msg.message = 'This account is already exist';
         return res.status(400).json(msg);
     }
-
-    // missing invalid object error
 
     const saltRounds = 10;
     newUser.password = bcrypt.hashSync(password, saltRounds);
@@ -62,8 +87,6 @@ const loginUserHandler = (req, res) => {
 
         return res.status(400).json(msg);
     }
-
-    // missing invalid object error
 
     try {
         if (!bcrypt.compareSync(password, foundUser.password)) {
@@ -145,8 +168,6 @@ const addNewProductHandler = (req, res) => {
     const newProduct = new Product(id, name, price, description, 0);
     const msg = { status: 'success', message: 'Added new product successfully' };
 
-    // missing invalid object error
-
     try {
         addProduct(newProduct);
         incrementProductId();
@@ -209,5 +230,6 @@ module.exports = {
     addNewProductHandler,
     viewAddProductPage,
     addProductToCartHandler,
-    viewCart
+    viewCart,
+    viewCheckout
 };
