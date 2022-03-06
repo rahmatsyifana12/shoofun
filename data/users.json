@@ -14,5 +14,13 @@
         "email": "rahmat@gmail.com",
         "phoneNumber": "08122981029",
         "password": "$2b$10$d8jsoJDfOKqyVpDRNGhpD.enTw0jRBbTTvtnaXeoHNVAFaZEHvWPG"
+    },
+    {
+        "id": 3,
+        "username": "aanrahmat12",
+        "displayName": "Aan Rahmat",
+        "email": "aanrahmat12@gmail.com",
+        "phoneNumber": "0811225827",
+        "password": "$2b$10$ipu6.ikJqrCqHzSpS7VxIe.5BfMC.X..ym7ifGKSJ1aUuH40l.xqW"
     }
 ]

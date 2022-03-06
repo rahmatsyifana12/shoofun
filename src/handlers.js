@@ -7,16 +7,6 @@ const { loadProducts, findProductById, addProduct } = require('./utils/products'
 const { getUserId, getProductId, incrementUserId, incrementProductId } = require('./utils/ids');
 const { addProductToCart, getUserCart } = require('./utils/carts');
 
-function parseJwt (token) {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-
-    return JSON.parse(jsonPayload);
-}
-
 const viewRegisterPage = (req, res) => {
     res.render('register');
 };
@@ -62,9 +52,9 @@ const addUserHandler = (req, res) => {
 };
 
 const loginUserHandler = (req, res) => {
-    const { usernameOrEmail, password } = req.body;
+    const { email, password } = req.body;
     const msg = { status: 'success', message: 'Successfully login' };
-    const foundUser = findUser(usernameOrEmail);
+    const foundUser = findUser(email);
 
     if (!foundUser) {
         msg.status = 'fail';
@@ -173,11 +163,19 @@ const addNewProductHandler = (req, res) => {
 const addProductToCartHandler = (req, res) => {
     const productId = req.params.productId;
     const foundProduct = findProductById(parseInt(productId));
+    let userId;
 
-    const authHeader = req.headers['authorization'];
-    const token = authHeader.split(' ')[1];
-    const payload = parseJwt(token);
-    const userId = payload.userId;
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader.split(' ')[1];
+        const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        userId = payload.userId;
+    } catch (e) {
+        return res.status(401).json({
+            status: 'fail',
+            message: 'Unauthorized error'
+        });
+    }
 
     if (!foundProduct) {
         return res.status(404).json({
@@ -201,28 +199,20 @@ const addProductToCartHandler = (req, res) => {
 };
 
 const viewCart = (req, res) => {
-    const authHeader = req.headers['authorization'];
+    let userId;
 
-    if (!authHeader) {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader.split(' ')[1];
+        const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        userId = payload.userId;
+    } catch (e) {
         return res.status(401).json({
             status: 'fail',
             message: 'Unauthorized error'
         });
     }
 
-    const token = authHeader.split(' ')[1];
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err) => {
-        if (err) {
-            return res.status(401).json({
-                status: 'fail',
-                message: 'Unauthorized error'
-            });
-        }
-    });
-
-    const payload = parseJwt(token);
-    const userId = payload.userId;
     const userCart = getUserCart(userId);
 
     return res.status(200).json({

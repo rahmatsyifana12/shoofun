@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "userId": 3,
+        "products": [
+            {
+                "id": 1,
+                "name": "Iphone X",
+                "price": "18000000",
+                "description": "Very cool smart phone",
+                "quantityPurchased": 0
+            }
+        ]
+    }
+]

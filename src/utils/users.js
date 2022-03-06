@@ -38,7 +38,8 @@ const findUser = (usernameOrEmail) => {
     const users = loadUsers();
 
     return users.find((user) => {
-        user.username === usernameOrEmail || user.email === usernameOrEmail;
+        return user.username === usernameOrEmail ||
+        user.email === usernameOrEmail;
     });
 };
 
