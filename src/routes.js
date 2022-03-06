@@ -11,6 +11,7 @@ const {
     addProductToCartHandler,
     viewCart
 } = require('./handlers');
+const { auth } = require('./middlewares/auth.middleware');
 
 const router = Router();
 
@@ -19,11 +20,11 @@ router.get('/register', viewRegisterPage);
 router.get('/', viewProducts);
 router.get('/products/:productId', viewProductById);
 router.get('/products/add', viewAddProductPage);
-router.get('/cart', viewCart);
+router.get('/cart', auth, viewCart);
 
 router.post('/login', loginUserHandler);
 router.post('/register', addUserHandler);
 router.post('/products/add', addNewProductHandler);
-router.post('/products/:productId', addProductToCartHandler);
+router.post('/products/:productId', auth, addProductToCartHandler);
 
 module.exports = router;

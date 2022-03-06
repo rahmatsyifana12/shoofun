@@ -163,19 +163,8 @@ const addNewProductHandler = (req, res) => {
 const addProductToCartHandler = (req, res) => {
     const productId = req.params.productId;
     const foundProduct = findProductById(parseInt(productId));
-    let userId;
-
-    try {
-        const authHeader = req.headers['authorization'];
-        const token = authHeader.split(' ')[1];
-        const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        userId = payload.userId;
-    } catch (e) {
-        return res.status(401).json({
-            status: 'fail',
-            message: 'Unauthorized error'
-        });
-    }
+    const token = req.headers['authorization'].split(' ')[1];
+    const userId = jwt.decode(token).userId;
 
     if (!foundProduct) {
         return res.status(404).json({
@@ -199,20 +188,8 @@ const addProductToCartHandler = (req, res) => {
 };
 
 const viewCart = (req, res) => {
-    let userId;
-
-    try {
-        const authHeader = req.headers['authorization'];
-        const token = authHeader.split(' ')[1];
-        const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        userId = payload.userId;
-    } catch (e) {
-        return res.status(401).json({
-            status: 'fail',
-            message: 'Unauthorized error'
-        });
-    }
-
+    const token = req.headers['authorization'].split(' ')[1];
+    const userId = jwt.decode(token).userId;
     const userCart = getUserCart(userId);
 
     return res.status(200).json({
