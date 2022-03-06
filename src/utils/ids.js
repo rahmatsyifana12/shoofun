@@ -14,20 +14,30 @@ const saveIds = (ids) => {
 const getUserId = () => {
     const ids = loadIds();
 
-    const newId = ids.userId;
-    ids.userId++;
-    saveIds(ids);
-
-    return newId;
+    return ids.userId;
 };
 
 const getProductId = () => {
     const ids = loadIds();
 
-    const newId = ids.productId;
-    ids.productId++;
-    saveIds(ids);
-    return newId;
+    return ids.productIdewId;
 };
 
-module.exports = { getUserId, getProductId };
+const incrementUserId = () => {
+    const ids = loadIds();
+    ids.userId++;
+    saveIds(ids);
+};
+
+const incrementProductId = () => {
+    const ids = loadIds();
+    ids.productId++;
+    saveIds(ids);
+};
+
+module.exports = {
+    getUserId,
+    getProductId,
+    incrementUserId,
+    incrementProductId
+};

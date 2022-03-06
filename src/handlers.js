@@ -4,7 +4,7 @@ const User = require('./models/user');
 const Product = require('./models/product');
 const { addUser, userAlreadyExist, findUser } = require('./utils/users');
 const { loadProducts, findProductById, addProduct } = require('./utils/products');
-const { getUserId, getProductId } = require('./utils/ids');
+const { getUserId, getProductId, incrementUserId, incrementProductId } = require('./utils/ids');
 const { addProductToCart, getUserCart } = require('./utils/carts');
 
 function parseJwt (token) {
@@ -50,7 +50,7 @@ const addUserHandler = (req, res) => {
 
     try {
         addUser(newUser);
-        console.log(newUser);
+        incrementUserId();
 
         return res.status(200).json(msg);
     } catch (err) {
@@ -159,7 +159,7 @@ const addNewProductHandler = (req, res) => {
 
     try {
         addProduct(newProduct);
-        console.log(newProduct);
+        incrementProductId();
 
         return res.status(200).json(msg);
     } catch (err) {
@@ -223,7 +223,6 @@ const viewCart = (req, res) => {
 
     const payload = parseJwt(token);
     const userId = payload.userId;
-
     const userCart = getUserCart(userId);
 
     return res.status(200).json({
