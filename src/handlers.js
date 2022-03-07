@@ -32,9 +32,9 @@ const viewCheckout = (req, res) => {
     try {
         return res.status(200).json({
             status: 'success',
-            products: userCart,
             displayName: foundUser.displayName,
-            address: foundUser.address
+            address: foundUser.address,
+            products: userCart
         });
     } catch (err) {
         return res.status(500).json({
@@ -102,8 +102,7 @@ const loginUserHandler = (req, res) => {
             },
             process.env.ACCESS_TOKEN_SECRET
         );
-        Object.assign(msg, { token }
-        );
+        Object.assign(msg, { token });
 
         return res.status(200).json(msg);
     } catch (err) {
@@ -220,6 +219,11 @@ const viewCart = (req, res) => {
     });
 };
 
+const purchaseHandler = (req, res) => {
+    const token = req.headers['authorization'].split(' ')[1];
+    const userId = jwt.decode(token).userId;
+};
+
 module.exports = {
     addUserHandler,
     loginUserHandler,
@@ -231,5 +235,6 @@ module.exports = {
     viewAddProductPage,
     addProductToCartHandler,
     viewCart,
-    viewCheckout
+    viewCheckout,
+    purchaseHandler
 };
