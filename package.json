@@ -16,7 +16,8 @@
     "ejs": "^3.1.6",
     "eslint": "^8.8.0",
     "express": "^4.17.2",
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.7.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

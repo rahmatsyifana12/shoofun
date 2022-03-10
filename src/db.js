@@ -1,4 +1,5 @@
 const Pool = require('pg').Pool;
+require('dotenv').config();
 const { env } = process;
 
 const pool = new Pool({
