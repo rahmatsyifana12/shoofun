@@ -67,7 +67,7 @@ const addUserHandler = (req, res) => {
     const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
     try {
-        const newUser = pool.query(
+        pool.query(
             `INSERT INTO users (email, password, display_name, address, phone_number)
             VALUES ($1, $2, $3, $4, $5);`,
             [email, hashedPassword, displayName, address, phoneNumber]
@@ -88,21 +88,32 @@ const addUserHandler = (req, res) => {
 const loginUserHandler = (req, res) => {
     const { email, password } = req.body;
     const msg = { status: 'success', message: 'Successfully login' };
-    const foundUser = findUser(email);
+    let foundUser;
 
-    if (!foundUser) {
-        msg.status = 'fail';
-        msg.message = 'Account doesn\'t exist';
+    try {
+        foundUser = pool.query(
+            'SELECT * FROM users WHERE email=$1', [email]
+        );
 
-        return res.status(400).json(msg);
+        if (foundUser.row.length === 0) {
+            return res.status(400).json({
+                status: 'fail',
+                message: 'Account doesn\'t exist'
+            });
+        }
+    } catch (err) {
+        console.error(err);
     }
 
     try {
-        if (!bcrypt.compareSync(password, foundUser.password)) {
+        if (!bcrypt.compareSync(password, foundUser.row[0].password)) {
             msg.status = 'fail';
             msg.message = 'Object or value is invalid';
 
-            return res.status(400).json(msg);
+            return res.status(400).json({
+                status: 'fail',
+                message: 'Object or value is invalid'
+            });
         }
         const token = jwt.sign(
             {
@@ -111,15 +122,17 @@ const loginUserHandler = (req, res) => {
             },
             process.env.ACCESS_TOKEN_SECRET
         );
-        Object.assign(msg, { token });
 
-        return res.status(200).json(msg);
+        return res.status(200).json({
+            status: 'success',
+            message: 'Successfully login',
+            token
+        });
     } catch (err) {
-        console.log(err);
-        msg.status = 'fail';
-        msg.message = 'Unexpected server error';
-
-        return res.status(500).json(msg);
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Unexpected server error'
+        });
     }
 };
 
