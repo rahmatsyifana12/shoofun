@@ -15,8 +15,6 @@ app.use(routes);
 
 app.listen(port, () => {
     try {
-        pool.connect();
-
         // Initialize all tables
         pool.query(
             `CREATE TABLE IF NOT EXISTS users (

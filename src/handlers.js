@@ -6,6 +6,7 @@ const { addUser, userAlreadyExist, findUser } = require('./utils/users');
 const { loadProducts, findProductById, addProduct } = require('./utils/products');
 const { getUserId, getProductId, incrementUserId, incrementProductId } = require('./utils/ids');
 const { addProductToCart, getUserCart } = require('./utils/carts');
+const pool = require('./db');
 
 const viewRegisterPage = (req, res) => {
     res.render('register');
@@ -46,33 +47,41 @@ const viewCheckout = (req, res) => {
 
 const addUserHandler = (req, res) => {
     const {
-        username, displayName, email, phoneNumber, address, password
+        email, password, displayName, address, phoneNumber
     } = req.body;
-    const id = getUserId();
-    const newUser = new User(
-        id, username, displayName, email, phoneNumber, address, password
-    );
-    const msg = { status: 'success', message: 'Successfully registered a new account' };
 
-    if (userAlreadyExist(username, email)) {
-        msg.status = 'fail';
-        msg.message = 'This account is already exist';
-        return res.status(400).json(msg);
+    try {
+        const allUsers = pool.query('SELECT * FROM users WHERE email=$1', [email]);
+
+        if (allUsers.row.length === 0) {
+            return res.status(400).json({
+                status: 'fail',
+                message: 'This account is already exist'
+            });
+        }
+    } catch (err) {
+        console.error(err);
     }
 
     const saltRounds = 10;
-    newUser.password = bcrypt.hashSync(password, saltRounds);
+    const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
     try {
-        addUser(newUser);
-        incrementUserId();
+        const newUser = pool.query(
+            `INSERT INTO users (email, password, display_name, address, phone_number)
+            VALUES ($1, $2, $3, $4, $5);`,
+            [email, hashedPassword, displayName, address, phoneNumber]
+        );
 
-        return res.status(200).json(msg);
+        return res.status(200).json({
+            status: 'success',
+            message: 'Successfully registered a new account'
+        });
     } catch (err) {
-        msg.status = 'fail';
-        msg.message = 'Unexpected server error';
-
-        return res.status(500).json(msg);
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Unexpected server error'
+        });
     }
 };
 
