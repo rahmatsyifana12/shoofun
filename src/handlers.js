@@ -117,8 +117,8 @@ const loginUserHandler = (req, res) => {
         }
         const token = jwt.sign(
             {
-                userId: foundUser.id,
-                username: foundUser.username
+                userId: foundUser.row[0].id,
+                email: foundUser.row[0].email
             },
             process.env.ACCESS_TOKEN_SECRET
         );
