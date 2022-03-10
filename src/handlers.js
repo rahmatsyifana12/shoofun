@@ -169,25 +169,35 @@ const viewProducts = (req, res) => {
 
 const viewProductById = (req, res) => {
     const productId = req.params.productId;
-    const foundProduct = findProductById(parseInt(productId));
-    const msg = { status: 'success', message: 'Product found' };
+    let foundProduct;
 
-    if (!foundProduct) {
-        msg.status = 'fail';
-        msg.message = 'Product not found';
+    try {
+        foundProduct = pool.query(
+            'SELECT * FROM products WHERE id=$1',
+            [productId]
+        );
 
-        return res.status(404).json(msg);
+        if (foundProduct.row.length === 0) {
+            return res.status(404).json({
+                status: 'fail',
+                message: 'Product not found'
+            });
+        }
+    } catch (err) {
+        console.error(err);
     }
 
     try {
-        Object.assign(msg, { foundProduct });
-
-        return res.status(200).json(msg);
+        return res.status(200).json({
+            status: 'success',
+            message: 'Product found',
+            product: foundProduct.row[0]
+        });
     } catch (err) {
-        msg.status = 'fail';
-        msg.message = 'Unexpected server error';
-
-        return res.status(500).json(msg);
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Unexpected server error'
+        });
     }
 };
 
