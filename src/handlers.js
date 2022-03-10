@@ -7,6 +7,7 @@ const { loadProducts, findProductById, addProduct } = require('./utils/products'
 const { getUserId, getProductId, incrementUserId, incrementProductId } = require('./utils/ids');
 const { addProductToCart, getUserCart } = require('./utils/carts');
 const pool = require('./db');
+const { newProductSchema } = require('./validations/product.validation');
 
 const viewRegisterPage = (req, res) => {
     res.render('register');
@@ -202,6 +203,15 @@ const viewProductById = (req, res) => {
 };
 
 const addNewProductHandler = (req, res) => {
+    const valResult =  newProductSchema.validate(req.body);
+
+    if (valResult.error) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Object or value is invalid'
+        });
+    }
+
     const { name, price, description, weight } = req.body;
 
     try {
