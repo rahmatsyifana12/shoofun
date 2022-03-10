@@ -51,7 +51,7 @@ const addUserHandler = (req, res) => {
     } = req.body;
 
     try {
-        const allUsers = pool.query('SELECT * FROM users WHERE email=$1', [email]);
+        const allUsers = pool.query('SELECT * FROM users WHERE email=$1;', [email]);
 
         if (allUsers.row.length === 0) {
             return res.status(400).json({
@@ -92,7 +92,7 @@ const loginUserHandler = (req, res) => {
 
     try {
         foundUser = pool.query(
-            'SELECT * FROM users WHERE email=$1', [email]
+            'SELECT * FROM users WHERE email=$1;', [email]
         );
 
         if (foundUser.row.length === 0) {
@@ -140,7 +140,7 @@ const viewProducts = (req, res) => {
     let products;
     try {
         products = pool.query(
-            'SELECT * FROM products'
+            'SELECT * FROM products;'
         );
 
         if (products.row.length === 0) {
@@ -173,7 +173,7 @@ const viewProductById = (req, res) => {
 
     try {
         foundProduct = pool.query(
-            'SELECT * FROM products WHERE id=$1',
+            'SELECT * FROM products WHERE id=$1;',
             [productId]
         );
 
@@ -202,21 +202,23 @@ const viewProductById = (req, res) => {
 };
 
 const addNewProductHandler = (req, res) => {
-    const { name, price, description } = req.body;
-    const id = getProductId();
-    const newProduct = new Product(id, name, price, description, 0);
-    const msg = { status: 'success', message: 'Added new product successfully' };
+    const { name, price, description, weight } = req.body;
 
     try {
-        addProduct(newProduct);
-        incrementProductId();
-
-        return res.status(200).json(msg);
+        pool.query(
+            `INSERT INTO products (name, price, description, weight, is_deleted)
+            VALUES ($1, $2, $3, $4);`,
+            [name, price, description, weight, false]
+        );
+        return res.status(200).json({
+            status: 'success',
+            message: 'Added new product successfully'
+        });
     } catch (err) {
-        msg.status = 'fail';
-        msg.message = 'Unexpected server error';
-
-        return res.status(500).json(msg);
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Unexpected server error'
+        });
     }
 };
 
