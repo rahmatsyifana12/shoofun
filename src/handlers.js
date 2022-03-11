@@ -111,7 +111,7 @@ const loginUserHandler = async (req, res) => {
     }
 
     try {
-        if (!bcrypt.compareSync(password, foundUser.row[0].password)) {
+        if (!bcrypt.compareSync(password, foundUser.rows[0].password)) {
             msg.status = 'fail';
             msg.message = 'Object or value is invalid';
 
@@ -122,8 +122,8 @@ const loginUserHandler = async (req, res) => {
         }
         const token = jwt.sign(
             {
-                userId: foundUser.row[0].id,
-                email: foundUser.row[0].email
+                userId: foundUser.rows[0].id,
+                email: foundUser.rows[0].email
             },
             process.env.ACCESS_TOKEN_SECRET
         );
@@ -134,6 +134,36 @@ const loginUserHandler = async (req, res) => {
             data: {
                 token
             }
+        });
+    } catch (err) {
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Unexpected server error'
+        });
+    }
+};
+
+const addNewProductHandler = async (req, res) => {
+    const valResult =  newProductSchema.validate(req.body);
+
+    if (valResult.error) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Object or value is invalid'
+        });
+    }
+
+    const { name, price, description, weight } = req.body;
+
+    try {
+        await pool.query(
+            `INSERT INTO products (name, price, description, weight, is_deleted)
+            VALUES ($1, $2, $3, $4, $5);`,
+            [name, price, description, weight, false]
+        );
+        return res.status(200).json({
+            status: 'success',
+            message: 'Added new product successfully'
         });
     } catch (err) {
         return res.status(500).json({
@@ -201,39 +231,8 @@ const viewProductById = async (req, res) => {
             status: 'success',
             message: 'Product found',
             data: {
-                product: foundProduct.row[0]
+                product: foundProduct.rows[0]
             }
-        });
-    } catch (err) {
-        return res.status(500).json({
-            status: 'fail',
-            message: 'Unexpected server error'
-        });
-    }
-};
-
-const addNewProductHandler = async (req, res) => {
-    const valResult =  newProductSchema.validate(req.body);
-
-    if (valResult.error) {
-        console.error(valResult);
-        return res.status(400).json({
-            status: 'fail',
-            message: 'Object or value is invalid'
-        });
-    }
-
-    const { name, price, description, weight } = req.body;
-
-    try {
-        await pool.query(
-            `INSERT INTO products (name, price, description, weight, is_deleted)
-            VALUES ($1, $2, $3, $4);`,
-            [name, price, description, weight, false]
-        );
-        return res.status(200).json({
-            status: 'success',
-            message: 'Added new product successfully'
         });
     } catch (err) {
         return res.status(500).json({
@@ -278,8 +277,8 @@ const addProductToCartHandler = async (req, res) => {
             [userId, cartStatus.IN_USE]
         );
 
-        if (!foundCart.rows) {
-            foundCart = pool.query(
+        if (!foundCart.rows.length) {
+            foundCart = await pool.query(
                 `INSERT INTO carts (user_id, status)
                 VALUES ($1, $2) RETURNING *;`,
                 [userId, cartStatus.IN_USE]
@@ -288,14 +287,14 @@ const addProductToCartHandler = async (req, res) => {
 
         let foundCartProduct = await pool.query(
             'SELECT * FROM cart_products WHERE cart_id = $1 AND product_id = $2;',
-            [foundCart.rows[0].cart_id, productId]
+            [foundCart.rows[0].id, productId]
         );
 
-        if (!foundCartProduct.rows) {
-            foundCartProduct = pool.query(
+        if (!foundCartProduct.rows.length) {
+            foundCartProduct = await pool.query(
                 `INSERT INTO cart_products (cart_id, product_id, quantity)
-                VALUES ($1, $2, $3);`,
-                [foundCart.rows[0].cart_id, productId, 1]
+                VALUES ($1, $2, $3) RETURNING *;`,
+                [foundCart.rows[0].id, productId, 1]
             );
         } else {
             await pool.query(
@@ -311,6 +310,7 @@ const addProductToCartHandler = async (req, res) => {
             message: 'Successfully add product to cart'
         });
     } catch (err) {
+        console.log(err);
         return res.status(500).json({
             status: 'error',
             message: 'Unexpected server error'
