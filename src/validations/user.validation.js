@@ -1,12 +1,12 @@
-const joi = require('joi');
+const Joi = require('joi');
 
-const newUserSchema = joi.object({
-    email: joi.string()
+const newUserSchema = Joi.object({
+    email: Joi.string()
         .max(64)
         .email()
         .required(),
 
-    password: joi
+    password: Joi.string()
         .min(8)
         .max(64)
 
@@ -24,7 +24,7 @@ const newUserSchema = joi.object({
 
         .required(),
 
-    displayName: joi.string()
+    displayName: Joi.string()
         .min(3)
         .max(64)
 
@@ -33,7 +33,11 @@ const newUserSchema = joi.object({
 
         .required(),
 
-    phoneNumber: joi.string()
+    address: Joi.string()
+        .max(255)
+        .required(),
+
+    phoneNumber: Joi.string()
         .max(64)
 
         .regex(/[0-9]+/)

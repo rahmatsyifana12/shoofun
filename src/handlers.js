@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { addProductToCart, getUserCart } = require('./utils/carts');
 const pool = require('./db');
 const { newUserSchema } = require('./validations/user.validation');
 const { newProductSchema } = require('./validations/product.validation');
@@ -42,11 +41,12 @@ const viewAddProductPage = (req, res) => {
 //     }
 // };
 
-const addUserHandler = (req, res) => {
+const addUserHandler = async (req, res) => {
     const valResult = newUserSchema.validate(req.body);
 
     if (valResult.error) {
-        res.status(400).json({
+        console.error(valResult);
+        return res.status(400).json({
             status: 'fail',
             message: 'Object or value is invalid'
         });
@@ -57,9 +57,8 @@ const addUserHandler = (req, res) => {
     } = req.body;
 
     try {
-        const allUsers = pool.query('SELECT * FROM users WHERE email = $1;', [email]);
-
-        if (allUsers.row.length === 0) {
+        const allUsers = await pool.query('SELECT * FROM users WHERE email = $1;', [email]);
+        if (allUsers.rows.length) {
             return res.status(400).json({
                 status: 'fail',
                 message: 'This account is already exist'
@@ -73,7 +72,7 @@ const addUserHandler = (req, res) => {
     const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
     try {
-        pool.query(
+        await pool.query(
             `INSERT INTO users (email, password, display_name, address, phone_number)
             VALUES ($1, $2, $3, $4, $5);`,
             [email, hashedPassword, displayName, address, phoneNumber]
@@ -91,17 +90,17 @@ const addUserHandler = (req, res) => {
     }
 };
 
-const loginUserHandler = (req, res) => {
+const loginUserHandler = async (req, res) => {
     const { email, password } = req.body;
     const msg = { status: 'success', message: 'Successfully login' };
     let foundUser;
 
     try {
-        foundUser = pool.query(
+        foundUser = await pool.query(
             'SELECT * FROM users WHERE email=$1;', [email]
         );
 
-        if (foundUser.row.length === 0) {
+        if (!foundUser.rows.length) {
             return res.status(400).json({
                 status: 'fail',
                 message: 'Account doesn\'t exist'
@@ -144,14 +143,14 @@ const loginUserHandler = (req, res) => {
     }
 };
 
-const viewProducts = (req, res) => {
+const viewProducts = async (req, res) => {
     let products;
     try {
-        products = pool.query(
+        products = await pool.query(
             'SELECT * FROM products;'
         );
 
-        if (products.row.length === 0) {
+        if (!products.rows.length) {
             return res.status(404).json({
                 status: 'fail',
                 message: 'Product not found'
@@ -166,7 +165,7 @@ const viewProducts = (req, res) => {
             status: 'success',
             message: 'Found all products',
             data: {
-                products: products.row
+                products: products.rows
             }
         });
     } catch (err) {
@@ -177,17 +176,17 @@ const viewProducts = (req, res) => {
     }
 };
 
-const viewProductById = (req, res) => {
+const viewProductById = async (req, res) => {
     const productId = req.params.productId;
     let foundProduct;
 
     try {
-        foundProduct = pool.query(
+        foundProduct = await pool.query(
             'SELECT * FROM products WHERE id = $1;',
             [productId]
         );
 
-        if (foundProduct.row.length === 0) {
+        if (!foundProduct.rows.length) {
             return res.status(404).json({
                 status: 'fail',
                 message: 'Product not found'
@@ -213,10 +212,11 @@ const viewProductById = (req, res) => {
     }
 };
 
-const addNewProductHandler = (req, res) => {
+const addNewProductHandler = async (req, res) => {
     const valResult =  newProductSchema.validate(req.body);
 
     if (valResult.error) {
+        console.error(valResult);
         return res.status(400).json({
             status: 'fail',
             message: 'Object or value is invalid'
@@ -226,7 +226,7 @@ const addNewProductHandler = (req, res) => {
     const { name, price, description, weight } = req.body;
 
     try {
-        pool.query(
+        await pool.query(
             `INSERT INTO products (name, price, description, weight, is_deleted)
             VALUES ($1, $2, $3, $4);`,
             [name, price, description, weight, false]
@@ -243,17 +243,17 @@ const addNewProductHandler = (req, res) => {
     }
 };
 
-const addProductToCartHandler = (req, res) => {
+const addProductToCartHandler = async (req, res) => {
     const productId = req.params.productId;
     let foundProduct;
 
     try {
-        foundProduct = pool.query(
+        foundProduct = await pool.query(
             'SELECT * FROM products WHERE id = $1;',
             [productId]
         );
 
-        if (foundProduct.row.length === 0) {
+        if (!foundProduct.rows.length) {
             return res.status(404).json({
                 status: 'fail',
                 message: 'Product not found'
@@ -273,12 +273,12 @@ const addProductToCartHandler = (req, res) => {
     };
 
     try {
-        let foundCart = pool.query(
+        let foundCart = await pool.query(
             'SELECT * FROM carts WHERE user_id = $1 AND status = $2',
             [userId, cartStatus.IN_USE]
         );
 
-        if (foundCart.row === 0) {
+        if (!foundCart.rows) {
             foundCart = pool.query(
                 `INSERT INTO carts (user_id, status)
                 VALUES ($1, $2) RETURNING *;`,
@@ -286,23 +286,23 @@ const addProductToCartHandler = (req, res) => {
             );
         }
 
-        let foundCartProduct = pool.query(
+        let foundCartProduct = await pool.query(
             'SELECT * FROM cart_products WHERE cart_id = $1 AND product_id = $2;',
-            [foundCart.row[0].cart_id, productId]
+            [foundCart.rows[0].cart_id, productId]
         );
 
-        if (foundCartProduct.row.length === 0) {
+        if (!foundCartProduct.rows) {
             foundCartProduct = pool.query(
                 `INSERT INTO cart_products (cart_id, product_id, quantity)
                 VALUES ($1, $2, $3);`,
-                [foundCart.row[0].cart_id, productId, 1]
+                [foundCart.rows[0].cart_id, productId, 1]
             );
         } else {
-            pool.query(
+            await pool.query(
                 'UPDATE cart_products SET quantity = $1 WHERE cart_id = $2 AND product_id = $3;',
-                [foundCartProduct.row[0].quantity + 1,
-                    foundCartProduct.row[0].cart_id,
-                    foundCartProduct.row[0].product_id]
+                [foundCartProduct.rows[0].quantity + 1,
+                    foundCartProduct.rows[0].cart_id,
+                    foundCartProduct.rows[0].product_id]
             );
         }
 
@@ -318,13 +318,13 @@ const addProductToCartHandler = (req, res) => {
     }
 };
 
-const getAllProductsInCart = (req, res) => {
+const getAllProductsInCart = async (req, res) => {
     const token = req.headers['authorization'].split(' ')[1];
     const userId = jwt.decode(token).userId;
     let productsInCart;
 
     try {
-        productsInCart = pool.query(
+        productsInCart = await pool.query(
             `SELECT products.name AS name, products.price AS price, cart_products.quantity AS quantity
             FROM carts
             JOIN cart_products ON carts.id = cart_products.cart_id
@@ -341,7 +341,7 @@ const getAllProductsInCart = (req, res) => {
             status: 'success',
             message: 'Cart found',
             data: {
-                products: productsInCart.row
+                products: productsInCart.rows
             }
         });
     } catch (err) {

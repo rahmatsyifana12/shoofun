@@ -13,21 +13,21 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(routes);
 
-app.listen(port, () => {
+app.listen(port, async () => {
     try {
         // Initialize all tables
-        pool.query(
+        await pool.query(
             `CREATE TABLE IF NOT EXISTS users (
                 id SERIAL NOT NULL PRIMARY KEY,
-                password VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
                 display_name VARCHAR(255) NOT NULL,
                 address VARCHAR(255) NOT NULL,
                 phone_number VARCHAR(255) NOT NULL
             );`
         );
 
-        pool.query(
+        await pool.query(
             `CREATE TABLE IF NOT EXISTS products (
                 id SERIAL NOT NULL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
@@ -38,7 +38,7 @@ app.listen(port, () => {
             );`
         );
 
-        pool.query(
+        await pool.query(
             `CREATE TABLE IF NOT EXISTS orders (
                 id SERIAL NOT NULL PRIMARY KEY,
                 user_id INT NOT NULL,
@@ -47,7 +47,16 @@ app.listen(port, () => {
             );`
         );
 
-        pool.query(
+        await pool.query(
+            `CREATE TABLE IF NOT EXISTS carts (
+                id SERIAL NOT NULL PRIMARY KEY,
+                user_id INT NOT NULL,
+                status BIT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );`
+        );
+
+        await pool.query(
             `CREATE TABLE IF NOT EXISTS order_details (
                 order_id INT NOT NULL,
                 product_id INT NOT NULL,
@@ -58,16 +67,7 @@ app.listen(port, () => {
             );`
         );
 
-        pool.query(
-            `CREATE TABLE IF NOT EXISTS carts (
-                id SERIAL NOT NULL PRIMARY KEY,
-                user_id INT NOT NULL,
-                status BIT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            );`
-        );
-
-        pool.query(
+        await pool.query(
             `CREATE TABLE IF NOT EXISTS cart_products (
                 cart_id INT NOT NULL,
                 product_id INT NOT NULL,

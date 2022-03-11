@@ -9,7 +9,6 @@ const {
     addNewProductHandler,
     viewAddProductPage,
     addProductToCartHandler,
-    viewCheckout,
     getAllProductsInCart
 } = require('./handlers');
 const { auth } = require('./middlewares/auth.middleware');
@@ -22,7 +21,6 @@ router.get('/', viewProducts);
 router.get('/products/:productId', viewProductById);
 router.get('/products/add', viewAddProductPage);
 router.get('/cart', auth, getAllProductsInCart);
-router.get('/cart/checkout', auth, viewCheckout);
 
 router.post('/login', loginUserHandler);
 router.post('/register', addUserHandler);
