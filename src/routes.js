@@ -1,30 +1,17 @@
 const { Router } = require('express');
-const {
-    addUserHandler,
-    loginUserHandler,
-    viewRegisterPage,
-    viewLoginPage,
-    viewProducts,
-    viewProductById,
-    addNewProductHandler,
-    viewAddProductPage,
-    addProductToCartHandler,
-    getAllProductsInCart
-} = require('./handlers');
+const { addNewUser, loginUserHandler } = require('./controllers/user.controller');
+const { addNewProduct, addProductToCart, getAllProducts, getProductById, getAllProductsInCart } = require('./controllers/product.controller');
 const { auth } = require('./middlewares/auth.middleware');
 
 const router = Router();
 
-router.get('/login', viewLoginPage);
-router.get('/register', viewRegisterPage);
-router.get('/', viewProducts);
-router.get('/products/:productId', viewProductById);
-router.get('/products/add', viewAddProductPage);
+router.get('/', getAllProducts);
+router.get('/products/:productId', getProductById);
 router.get('/cart', auth, getAllProductsInCart);
 
 router.post('/login', loginUserHandler);
-router.post('/register', addUserHandler);
-router.post('/products/add', addNewProductHandler);
-router.post('/products/:productId', auth, addProductToCartHandler);
+router.post('/register', addNewUser);
+router.post('/products/add', addNewProduct);
+router.post('/products/:productId', auth, addProductToCart);
 
 module.exports = router;
