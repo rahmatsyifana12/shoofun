@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const pool = require('./db');
-const { newUserSchema } = require('./validations/user.validation');
+const pool = require('../db');
+const { newUserSchema } = require('../validations/user.validation');
 
 async function addNewUser(req, res) {
     const valResult = newUserSchema.validate(req.body);

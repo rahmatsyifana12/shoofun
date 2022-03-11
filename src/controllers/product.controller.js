@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const pool = require('./db');
-const { newProductSchema } = require('./validations/product.validation');
+const pool = require('../db');
+const { newProductSchema } = require('../validations/product.validation');
 
 async function addNewProduct(req, res) {
     const valResult =  newProductSchema.validate(req.body);
