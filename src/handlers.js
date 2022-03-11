@@ -17,30 +17,30 @@ const viewAddProductPage = (req, res) => {
     res.render('addProduct');
 };
 
-const viewCheckout = (req, res) => {
-    const token = req.headers['authorization'].split(' ')[1];
-    const userId = jwt.decode(token).userId;
-    const userCart = getUserCart(userId);
-    const foundUser = findUser(userId);
+// const viewCheckout = (req, res) => {
+//     const token = req.headers['authorization'].split(' ')[1];
+//     const userId = jwt.decode(token).userId;
+//     const userCart = getUserCart(userId);
+//     const foundUser = findUser(userId);
 
-    if (!userCart || userCart.length) {
-        // redirect to cart
-    }
+//     if (!userCart || userCart.length) {
+//         // redirect to cart
+//     }
 
-    try {
-        return res.status(200).json({
-            status: 'success',
-            displayName: foundUser.displayName,
-            address: foundUser.address,
-            products: userCart
-        });
-    } catch (err) {
-        return res.status(500).json({
-            status: 'fail',
-            message: 'Unexpected server error'
-        });
-    }
-};
+//     try {
+//         return res.status(200).json({
+//             status: 'success',
+//             displayName: foundUser.displayName,
+//             address: foundUser.address,
+//             products: userCart
+//         });
+//     } catch (err) {
+//         return res.status(500).json({
+//             status: 'fail',
+//             message: 'Unexpected server error'
+//         });
+//     }
+// };
 
 const addUserHandler = (req, res) => {
     const valResult = newUserSchema.validate(req.body);
@@ -318,27 +318,38 @@ const addProductToCartHandler = (req, res) => {
     }
 };
 
-const viewCart = (req, res) => {
+const getAllProductsInCart = (req, res) => {
     const token = req.headers['authorization'].split(' ')[1];
     const userId = jwt.decode(token).userId;
-    let userCart;
+    let productsInCart;
 
     try {
-        
+        productsInCart = pool.query(
+            `SELECT products.name AS name, products.price AS price, cart_products.quantity AS quantity
+            FROM carts
+            JOIN cart_products ON carts.id = cart_products.cart_id
+            JOIN products ON cart_products.product_id = products.id
+            WHERE carts.user_id = $1;`,
+            [userId]
+        );
     } catch (err) {
         console.error(err);
     }
 
-    return res.status(200).json({
-        status: 'success',
-        message: 'Cart found',
-        products: userCart
-    });
-};
-
-const purchaseHandler = (req, res) => {
-    const token = req.headers['authorization'].split(' ')[1];
-    const userId = jwt.decode(token).userId;
+    try {
+        return res.status(200).json({
+            status: 'success',
+            message: 'Cart found',
+            data: {
+                products: productsInCart.row
+            }
+        });
+    } catch (err) {
+        return res.status(500).json({
+            status: 'error',
+            message: 'Unexpected server error'
+        });
+    }
 };
 
 module.exports = {
@@ -351,7 +362,5 @@ module.exports = {
     addNewProductHandler,
     viewAddProductPage,
     addProductToCartHandler,
-    viewCart,
-    viewCheckout,
-    purchaseHandler
+    getAllProductsInCart
 };
