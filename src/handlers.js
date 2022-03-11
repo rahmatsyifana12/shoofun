@@ -1,10 +1,5 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('./models/user');
-const Product = require('./models/product');
-const { addUser, userAlreadyExist, findUser } = require('./utils/users');
-const { loadProducts, findProductById, addProduct } = require('./utils/products');
-const { getUserId, getProductId, incrementUserId, incrementProductId } = require('./utils/ids');
 const { addProductToCart, getUserCart } = require('./utils/carts');
 const pool = require('./db');
 const { newUserSchema } = require('./validations/user.validation');
@@ -62,7 +57,7 @@ const addUserHandler = (req, res) => {
     } = req.body;
 
     try {
-        const allUsers = pool.query('SELECT * FROM users WHERE email=$1;', [email]);
+        const allUsers = pool.query('SELECT * FROM users WHERE email = $1;', [email]);
 
         if (allUsers.row.length === 0) {
             return res.status(400).json({
@@ -137,7 +132,9 @@ const loginUserHandler = (req, res) => {
         return res.status(200).json({
             status: 'success',
             message: 'Successfully login',
-            token
+            data: {
+                token
+            }
         });
     } catch (err) {
         return res.status(500).json({
@@ -168,7 +165,9 @@ const viewProducts = (req, res) => {
         return res.status(200).json({
             status: 'success',
             message: 'Found all products',
-            products: products.row
+            data: {
+                products: products.row
+            }
         });
     } catch (err) {
         return res.status(500).json({
@@ -184,7 +183,7 @@ const viewProductById = (req, res) => {
 
     try {
         foundProduct = pool.query(
-            'SELECT * FROM products WHERE id=$1;',
+            'SELECT * FROM products WHERE id = $1;',
             [productId]
         );
 
@@ -202,7 +201,9 @@ const viewProductById = (req, res) => {
         return res.status(200).json({
             status: 'success',
             message: 'Product found',
-            product: foundProduct.row[0]
+            data: {
+                product: foundProduct.row[0]
+            }
         });
     } catch (err) {
         return res.status(500).json({
@@ -244,22 +245,70 @@ const addNewProductHandler = (req, res) => {
 
 const addProductToCartHandler = (req, res) => {
     const productId = req.params.productId;
-    const foundProduct = findProductById(parseInt(productId));
+    let foundProduct;
+
+    try {
+        foundProduct = pool.query(
+            'SELECT * FROM products WHERE id = $1;',
+            [productId]
+        );
+
+        if (foundProduct.row.length === 0) {
+            return res.status(404).json({
+                status: 'fail',
+                message: 'Product not found'
+            });
+        }
+    } catch (err) {
+        console.error(err);
+    }
+
     const token = req.headers['authorization'].split(' ')[1];
     const userId = jwt.decode(token).userId;
 
-    if (!foundProduct) {
-        return res.status(404).json({
-            status: 'fail',
-            message: 'Product not found'
-        });
-    }
+    const cartStatus = {
+        IN_USE: 0,
+        PROCESSED: 1,
+        CANCELLED: 2
+    };
 
     try {
-        addProductToCart(userId, foundProduct);
+        let foundCart = pool.query(
+            'SELECT * FROM carts WHERE user_id = $1 AND status = $2',
+            [userId, cartStatus.IN_USE]
+        );
+
+        if (foundCart.row === 0) {
+            foundCart = pool.query(
+                `INSERT INTO carts (user_id, status)
+                VALUES ($1, $2) RETURNING *;`,
+                [userId, cartStatus.IN_USE]
+            );
+        }
+
+        let foundCartProduct = pool.query(
+            'SELECT * FROM cart_products WHERE cart_id = $1 AND product_id = $2;',
+            [foundCart.row[0].cart_id, productId]
+        );
+
+        if (foundCartProduct.row.length === 0) {
+            foundCartProduct = pool.query(
+                `INSERT INTO cart_products (cart_id, product_id, quantity)
+                VALUES ($1, $2, $3);`,
+                [foundCart.row[0].cart_id, productId, 1]
+            );
+        } else {
+            pool.query(
+                'UPDATE cart_products SET quantity = $1 WHERE cart_id = $2 AND product_id = $3;',
+                [foundCartProduct.row[0].quantity + 1,
+                    foundCartProduct.row[0].cart_id,
+                    foundCartProduct.row[0].product_id]
+            );
+        }
+
         return res.status(200).json({
             status: 'success',
-            message: 'Successfully added product to cart'
+            message: 'Successfully add product to cart'
         });
     } catch (err) {
         return res.status(500).json({
@@ -272,7 +321,13 @@ const addProductToCartHandler = (req, res) => {
 const viewCart = (req, res) => {
     const token = req.headers['authorization'].split(' ')[1];
     const userId = jwt.decode(token).userId;
-    const userCart = getUserCart(userId);
+    let userCart;
+
+    try {
+        
+    } catch (err) {
+        console.error(err);
+    }
 
     return res.status(200).json({
         status: 'success',
