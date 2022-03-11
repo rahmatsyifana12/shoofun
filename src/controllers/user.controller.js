@@ -3,6 +3,12 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db');
 const { newUserSchema } = require('../validations/user.validation');
 
+const refreshTokens = [];
+
+async function generateAccessToken(user) {
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '900s' });
+}
+
 async function addNewUser(req, res) {
     const valResult = newUserSchema.validate(req.body);
 
@@ -82,19 +88,25 @@ async function loginUserHandler(req, res) {
                 message: 'Object or value is invalid'
             });
         }
-        const token = jwt.sign(
-            {
-                userId: foundUser.rows[0].id,
-                email: foundUser.rows[0].email
-            },
-            process.env.ACCESS_TOKEN_SECRET
+
+        const user = {
+            userId: foundUser.rows[0].id,
+            email: foundUser.rows[0].email
+        };
+
+        const accessToken = generateAccessToken(user);
+        const refreshToken = jwt.sign(
+            user,
+            process.env.REFRESH_TOKEN_SECRET
         );
+        refreshTokens.push(refreshToken);
 
         return res.status(200).json({
             status: 'success',
             message: 'Successfully login',
             data: {
-                token
+                accessToken,
+                refreshToken
             }
         });
     } catch (err) {

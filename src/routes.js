@@ -13,5 +13,6 @@ router.post('/login', loginUserHandler);
 router.post('/register', addNewUser);
 router.post('/products/add', addNewProduct);
 router.post('/products/:productId', auth, addProductToCart);
+router.post('/refreshtoken/');
 
 module.exports = router;
