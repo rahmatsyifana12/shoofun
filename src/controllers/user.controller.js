@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db');
 const { newUserSchema } = require('../validations/user.validation');
 
-const refreshTokens = [];
+let refreshTokens = [];
 
 async function generateAccessToken(user) {
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '900s' });
@@ -117,6 +117,24 @@ async function loginUserHandler(req, res) {
     }
 }
 
+async function logoutUserHandler(req, res) {
+    const authHeader = req.headers['authorization'];
+    const refreshToken = authHeader.split(' ')[1];
+
+    try {
+        refreshTokens = refreshTokens.filter((rt) => rt !== refreshToken);
+        return res.status(200).json({
+            status: 'success',
+            message: 'Logged out of session successfully'
+        });
+    } catch (err) {
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Unexpected server error'
+        });
+    }
+}
+
 async function refreshAccessToken(req, res) {
     const authHeader = req.headers['authorization'];
     const refreshToken = authHeader.split(' ')[1];
@@ -158,5 +176,6 @@ async function refreshAccessToken(req, res) {
 module.exports = {
     addNewUser,
     loginUserHandler,
+    logoutUserHandler,
     refreshAccessToken
 };

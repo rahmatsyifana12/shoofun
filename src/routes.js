@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const { addNewUser,
     loginUserHandler,
-    refreshAccessToken } = require('./controllers/user.controller');
+    refreshAccessToken,
+    logoutUserHandler } = require('./controllers/user.controller');
 const { addNewProduct,
     addProductToCart,
     getAllProducts,
@@ -20,5 +21,7 @@ router.post('/register', addNewUser);
 router.post('/products/add', addNewProduct);
 router.post('/products/:productId', auth, addProductToCart);
 router.post('/refreshtoken/', auth, refreshAccessToken);
+
+router.delete('/logout', auth, logoutUserHandler);
 
 module.exports = router;
