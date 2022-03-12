@@ -117,4 +117,46 @@ async function loginUserHandler(req, res) {
     }
 }
 
-module.exports = { addNewUser, loginUserHandler };
+async function refreshAccessToken(req, res) {
+    const authHeader = req.headers['authorization'];
+    const refreshToken = authHeader.split(' ')[1];
+
+    const errMsg = {
+        status: 'fail',
+        message: 'Unauthorized error'
+    };
+
+    if (!refreshToken) {
+        return res.status(401).json(errMsg);
+    }
+
+    if (!refreshTokens.includes(refreshToken)) {
+        return res.status(401).json(errMsg);
+    }
+
+    jwt.verify(
+        refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, user) => {
+            if (err) {
+                return res.status(401).json(errMsg);
+            }
+
+            const accessToken = generateAccessToken({
+                userId: user.userId,
+                email: user.email
+            });
+
+            return res.status(200).json({
+                status: 'success',
+                message: 'Successfully refresh a new access token',
+                data: {
+                    accessToken
+                }
+            });
+        });
+}
+
+module.exports = {
+    addNewUser,
+    loginUserHandler,
+    refreshAccessToken
+};

@@ -1,6 +1,12 @@
 const { Router } = require('express');
-const { addNewUser, loginUserHandler } = require('./controllers/user.controller');
-const { addNewProduct, addProductToCart, getAllProducts, getProductById, getAllProductsInCart } = require('./controllers/product.controller');
+const { addNewUser,
+    loginUserHandler,
+    refreshAccessToken } = require('./controllers/user.controller');
+const { addNewProduct,
+    addProductToCart,
+    getAllProducts,
+    getProductById,
+    getAllProductsInCart } = require('./controllers/product.controller');
 const { auth } = require('./middlewares/auth.middleware');
 
 const router = Router();
@@ -13,16 +19,6 @@ router.post('/login', loginUserHandler);
 router.post('/register', addNewUser);
 router.post('/products/add', addNewProduct);
 router.post('/products/:productId', auth, addProductToCart);
-router.post('/refreshtoken/', async (req, res) => {
-    const authHeader = req.headers['authorization'];
-    const refreshToken = authHeader.split(' ')[1];
-
-    if (!refreshToken) {
-        return res.status(401).json({
-            status: 'fail',
-            message: 'Unauthorized error'
-        });
-    }
-});
+router.post('/refreshtoken/', auth, refreshAccessToken);
 
 module.exports = router;
